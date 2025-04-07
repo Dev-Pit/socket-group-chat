@@ -7,7 +7,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "https://socket-group-chat.vercel.app/", // Allow all origins
+    origin: "http://localhost:5173", //https://socket-group-chat.vercel.app/ Allow origins
     methods: ["GET", "POST"], // Specify allowed HTTP methods
   },
 });
@@ -28,6 +28,7 @@ io.on("connection", (socket) => {
     socket.emit("roomList", roomList);
   }
 
+  // * for Left Panel
   // joining a room
   socket.on("joinRoom", (roomName) => {
     // checking roomName value
@@ -44,21 +45,24 @@ io.on("connection", (socket) => {
     if (!room) {
       room = { roomName, users: [socket.id] };
       roomList.push(room);
-      console.log(`\nNew room created: ${roomName}`);
+      console.info(`\nserver: New room created: ${roomName}`);
     }
 
-    console.log(`\nCurrent room list: ${JSON.stringify(roomList)}`);
+    console.info(`\ncurrent room list: ${JSON.stringify(roomList)}`);
 
-    socket.emit("roomList", roomList);
+    io.to(roomName).emit("roomList", roomList);
   });
 
+  // when sending message event triggered
   socket.on("sendMessage", (data) => {
     const { roomName, message, senderId } = data;
     roomMessages.push(data);
 
-    console.log(`i stored it in the array: ${roomMessages}`);
+    console.log(`\nserver: msg stored in the array: ${roomMessages}`);
 
-    // io.to(roomName).emit("message", roomMessages);
+    // Broadcast the updated messages to all clients in the room
+    // const allRoomMsgs = roomMessages.filter((msg) => msg.roomName === roomName);
+    // io.to(roomName).emit("message", allRoomMsgs ); // Send to all in the room
   });
 
   socket.on("showRoomMessage", (roomName) => {

@@ -10,21 +10,23 @@ const LeftPanel = ({ roomList, joinRoom, handleMessageToRoom }) => {
   const [selectedRoom, setSelectedRoom] = useState("");
   //   const [messages, setMessages] = useState([]);
 
-  // Send Message
-  const sendMessage = () => {
-    console.log(`send clicked`);
-    if (selectedRoom && message) {
-      handleMessageToRoom(selectedRoom, message);
-      setMessage(""); // Clear input after sending
-    }
-  };
-
+  // create room
   const handleCreateRoom = () => {
-    if (room) {
-      joinRoom(room);
+    const roomName = room.trim();
+    if (roomName) {
+      joinRoom(roomName);
       setRoom("");
     } else {
       alert("Insert room name!");
+    }
+  };
+
+  // Send Message
+  const sendMessage = () => {
+    console.log(`client: LeftPanel: send button clicked\n`);
+    if (selectedRoom && message) {
+      handleMessageToRoom(selectedRoom, message);
+      setMessage(""); // Clear input after sending
     }
   };
 
@@ -38,7 +40,7 @@ const LeftPanel = ({ roomList, joinRoom, handleMessageToRoom }) => {
     <div className="flex flex-1/3 flex-col gap-1 justify-center items-center p-5 ">
       <h2 className="text-3xl font-bold underline mb-5">Socket.io Room Chat</h2>
 
-      {/* Room Input */}
+      {/* Create Room */}
       <input
         className="w-80 h-12 px-4 border-2 border-green-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 mb-2"
         placeholder="Enter room name"
@@ -55,8 +57,7 @@ const LeftPanel = ({ roomList, joinRoom, handleMessageToRoom }) => {
 
       <hr className="my-5 w-full border-t-2" />
 
-      {/* Message Input */}
-
+      {/* Message to room  */}
       <p className="font-bold">Select Room</p>
       {roomList !== null && roomList.length > 0 ? (
         <>

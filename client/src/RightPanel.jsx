@@ -1,21 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 
-const RightPanel = ({ roomList, roomMessages, displayRoomMessage }) => {
-  const [selectedRoom, setSelectedRoom] = useState("");
-
+const RightPanel = ({
+  roomList,
+  roomMessages,
+  displayRoomMessage,
+  selectedRoom,
+  handleSetSelectedRoom,
+}) => {
   const handleChange = (e) => {
     const newRoom = e.target.value;
-    setSelectedRoom(newRoom);
     displayRoomMessage(newRoom); // Trigger message fetch for new room
+    handleSetSelectedRoom(newRoom);
   };
 
   useEffect(() => {
     if (roomList?.length > 0) {
       const initialRoom = roomList[0].roomName;
-      setSelectedRoom(initialRoom);
+      console.log(`\nclient: Right panel: room name got: ${initialRoom}`);
       displayRoomMessage(initialRoom); // Fetch messages for initial room
+      handleSetSelectedRoom(initialRoom);
     }
-  }, [roomList, displayRoomMessage]); // Include displayRoomMessage in dependencies
+  }, [roomList, displayRoomMessage, handleSetSelectedRoom]);
 
   return (
     <div className="flex flex-2/3  flex-col gap-1 p-5 border-l">
@@ -36,10 +41,20 @@ const RightPanel = ({ roomList, roomMessages, displayRoomMessage }) => {
         <p>No room available!</p>
       )}
 
-      <div className="bg-amber-100 w-[100%] h-[100%]">
-        {roomMessages?.map((msg, index) => (
-          <p key={index}>{msg.message}</p>
-        ))}
+      {/* display messages of the room */}
+      <div className="bg-amber-100 w-[100%] h-[100%] p-5">
+        {Array.isArray(roomMessages) && roomMessages.length === 0 ? (
+          roomMessages.map((msg, index) => (
+            <p key={index}>
+              {msg.message}
+              <span className="mx-3 bg-green-300 p-1 font-bold">
+                [sender]: {msg.senderId}
+              </span>
+            </p>
+          ))
+        ) : (
+          <></>
+        )}
       </div>
     </div>
   );

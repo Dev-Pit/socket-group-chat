@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import socket from "./socket";
 
@@ -8,13 +8,14 @@ import RightPanel from "./RightPanel";
 function App() {
   const [roomList, setRoomList] = useState([]); // list of rooms to display in select
   const [roomMessages, setRoomMessages] = useState([]);
+  // for Right Panel
+  const [selectedRoom, setSelectedRoom] = useState("");
 
-  // * Left panel
-  const [room, setRoom] = useState("");
+  // * functions for Left panel
   // Join Room
   const joinRoom = (data) => {
-    if (data.trim()) {
-      setRoom(data);
+    if (data) {
+      // setRoom(data);
       socket.emit("joinRoom", data);
     }
   };
@@ -25,17 +26,21 @@ function App() {
     socket.emit("sendMessage", { roomName, message, senderId: socket.id });
   };
 
-  // right panel
+  //* right panel
+  const handleSetSelectedRoom = (roomName) => {
+    setSelectedRoom(roomName);
+    // displayRoomMessage(roomName);
+  };
   // Memoize displayRoomMessage to prevent unnecessary re-renders
-  const displayRoomMessage = useCallback((roomName) => {
+  const displayRoomMessage = (roomName) => {
     if (roomName) {
       socket.emit("showRoomMessage", roomName);
     }
-  }, []);
+  };
 
   useEffect(() => {
     socket.on("connect", () => {
-      // console.log(`client: connected to server: socket: ${socket}`);
+      console.log(`:smile client: connection established: ${socket}`);
     });
 
     // fetch list of rooms from server
@@ -43,15 +48,18 @@ function App() {
       setRoomList(data);
     });
 
+    // * messages will be displayed by room name
     socket.on("message", (data) => {
+      console.log(`client: message received: ${JSON.stringify(data)}`);
       setRoomMessages(data);
     });
 
     return () => {
       socket.off("connect");
       socket.off("roomList");
+      socket.off("message");
     };
-  }, [room]);
+  }, [selectedRoom]);
   return (
     <div className="w-[80vw] h-[80vh] flex justify-center align-middle">
       <LeftPanel
@@ -64,6 +72,8 @@ function App() {
         roomList={roomList}
         displayRoomMessage={displayRoomMessage}
         roomMessages={roomMessages}
+        selectedRoom={selectedRoom}
+        handleSetSelectedRoom={handleSetSelectedRoom}
       />
     </div>
   );
