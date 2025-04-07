@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import "./App.css";
 import socket from "./socket";
 
@@ -7,73 +7,49 @@ import RightPanel from "./RightPanel";
 
 function App() {
   const [roomList, setRoomList] = useState([]); // list of rooms to display in select
-  const [roomMessages, setRoomMessages] = useState([]);
-  // for Right Panel
-  const [selectedRoom, setSelectedRoom] = useState("");
+  // for RightPanel
+  const [messages, setMessages] = useState([]); // messages that need to be displayed
 
-  // * functions for Left panel
-  // Join Room
-  const joinRoom = (data) => {
-    if (data) {
-      // setRoom(data);
-      socket.emit("joinRoom", data);
-    }
+  const fetchRoomList = () => {
+    socket.emit("fetchRoomList");
   };
 
-  // send message to room
-  const handleMessageToRoom = (roomName, message) => {
-    // console.log(`Room name: ${roomName} and message: ${message}`);
-    socket.emit("sendMessage", { roomName, message, senderId: socket.id });
-  };
-
-  //* right panel
-  const handleSetSelectedRoom = (roomName) => {
-    setSelectedRoom(roomName);
-    // displayRoomMessage(roomName);
-  };
-  // Memoize displayRoomMessage to prevent unnecessary re-renders
-  const displayRoomMessage = (roomName) => {
-    if (roomName) {
-      socket.emit("showRoomMessage", roomName);
-    }
-  };
+  const fetchRoomMessage = useCallback((roomName) => {
+    console.log(`fetching room messages from room: ${roomName}`);
+    socket.emit("showRoomMessage", roomName);
+  }, []);
 
   useEffect(() => {
     socket.on("connect", () => {
-      console.log(`:smile client: connection established: ${socket}`);
+      console.log(`connected to socket: ${JSON.stringify(socket.id)}\n`);
+    });
+    fetchRoomList();
+    socket.on("roomList", (rooms) => {
+      console.log(`client: LeftPanel: room list received`);
+      setRoomList(rooms);
     });
 
-    // fetch list of rooms from server
-    socket.on("roomList", (data) => {
-      setRoomList(data);
-    });
-
-    // * messages will be displayed by room name
     socket.on("message", (data) => {
-      console.log(`client: message received: ${JSON.stringify(data)}`);
-      setRoomMessages(data);
+      console.log(`left panel: got message: ${JSON.stringify(data)}`);
+      setMessages(data);
     });
 
     return () => {
+      // Cleanup socket listeners on component unmount
       socket.off("connect");
       socket.off("roomList");
       socket.off("message");
     };
-  }, [selectedRoom]);
+  }, []);
+
   return (
     <div className="w-[80vw] h-[80vh] flex justify-center align-middle">
-      <LeftPanel
-        roomList={roomList}
-        joinRoom={joinRoom}
-        handleMessageToRoom={handleMessageToRoom}
-      />
+      <LeftPanel roomList={roomList} fetchRoomMessage={fetchRoomMessage} />
 
       <RightPanel
         roomList={roomList}
-        displayRoomMessage={displayRoomMessage}
-        roomMessages={roomMessages}
-        selectedRoom={selectedRoom}
-        handleSetSelectedRoom={handleSetSelectedRoom}
+        fetchRoomMessage={fetchRoomMessage}
+        messages={messages}
       />
     </div>
   );

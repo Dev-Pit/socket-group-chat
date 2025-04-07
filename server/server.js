@@ -53,20 +53,28 @@ io.on("connection", (socket) => {
     io.to(roomName).emit("roomList", roomList);
   });
 
+  // fetch roomList
+  socket.on("fetchRoomList", () => {
+    console.log(`server: fetching room list`);
+    socket.emit("roomList", roomList);
+  });
+
   // when sending message event triggered
   socket.on("sendMessage", (data) => {
     const { roomName, message, senderId } = data;
     roomMessages.push(data);
 
-    console.log(`\nserver: msg stored in the array: ${roomMessages}`);
+    console.log(
+      `\nserver: msg sent from left panel: ${JSON.stringify(roomMessages)}`
+    );
 
-    // Broadcast the updated messages to all clients in the room
-    // const allRoomMsgs = roomMessages.filter((msg) => msg.roomName === roomName);
-    // io.to(roomName).emit("message", allRoomMsgs ); // Send to all in the room
+    io.emit("newMessage", roomName);
   });
 
   socket.on("showRoomMessage", (roomName) => {
+    console.log(`\nserver: show room message for room: ${roomName}`);
     const allRoomMsgs = roomMessages.filter((msg) => msg.roomName === roomName);
+    console.log(`\nlist of room messages: ${allRoomMsgs}`);
     io.to(roomName).emit("message", allRoomMsgs);
   });
 

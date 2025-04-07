@@ -1,14 +1,28 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { BiSolidDoorOpen } from "react-icons/bi";
 import { RiSendPlaneFill } from "react-icons/ri";
 
-import { useState } from "react";
+import socket from "./socket"; // import socket instance
 
-const LeftPanel = ({ roomList, joinRoom, handleMessageToRoom }) => {
+const LeftPanel = ({ roomList, fetchRoomMessage }) => {
   const [room, setRoom] = useState("");
   const [message, setMessage] = useState("");
   const [selectedRoom, setSelectedRoom] = useState("");
-  //   const [messages, setMessages] = useState([]);
+
+  // const [roomList, setRoomList] = useState([]); // list of rooms to display in select
+
+  // * functions for Left panel
+  // Join Room
+  const joinRoom = (data) => {
+    if (data) {
+      socket.emit("joinRoom", data);
+    }
+  };
+
+  // fetch room list
+  // const fetchRoomList = () => {
+  //   socket.emit("fetchRoomList");
+  // };
 
   // create room
   const handleCreateRoom = () => {
@@ -21,14 +35,32 @@ const LeftPanel = ({ roomList, joinRoom, handleMessageToRoom }) => {
     }
   };
 
+  // send message to room
+  const handleMessageToRoom = (roomName, message) => {
+    // console.log(`Room name: ${roomName} and message: ${message}`);
+    socket.emit("sendMessage", { roomName, message, senderId: socket.id });
+    // fetchRoomMessage(roomName);
+  };
   // Send Message
   const sendMessage = () => {
     console.log(`client: LeftPanel: send button clicked\n`);
     if (selectedRoom && message) {
+      // console.log(`leftPanel: sss ${selectedRoom} and message: ${message}`);
       handleMessageToRoom(selectedRoom, message);
       setMessage(""); // Clear input after sending
     }
   };
+
+  useEffect(() => {
+    // socket.on("connect", () => {
+    //   console.log(`client: LeftPanel: connected to socket: ${socket.id}`);
+    // });
+    // fetchRoomList();
+    // socket.on("roomList", (rooms) => {
+    //   console.log(`client: LeftPanel: room list received`);
+    //   setRoomList(rooms);
+    // });
+  }, []);
 
   useEffect(() => {
     if (roomList !== null && roomList.length > 0) {
