@@ -64,7 +64,8 @@ const RightPanel = ({ roomList, fetchRoomMessage, messages }) => {
           messages.map((msg, index) => (
             <div key={index} className="border-b-2 border-gray-300 p-2">
               <p>
-                <strong>{msg.senderId}:</strong> {msg.message}
+                <strong>{msg.message}:</strong>
+                <span className="text-[9px]">[{msg.senderId}]</span>
               </p>
             </div>
           ))
