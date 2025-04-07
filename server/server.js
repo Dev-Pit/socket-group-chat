@@ -20,8 +20,8 @@ const roomList = [];
 const roomMessages = [];
 
 io.on("connection", (socket) => {
-  console.log(`\nserver: user connected to socket: ${socket.id}`);
-  console.log(`users connected to socket: ${io.engine.clientsCount}`);
+  // console.log(`\nserver: user connected to socket: ${socket.id}`);
+  // console.log(`users connected to socket: ${io.engine.clientsCount}`);
 
   // if previous roomlist available then send to client
   if (roomList !== null && roomList.length > 0) {
@@ -33,7 +33,7 @@ io.on("connection", (socket) => {
   socket.on("joinRoom", (roomName) => {
     // checking roomName value
     if (!roomName || typeof roomName !== "string") {
-      console.error(`server: Invalid room name`);
+      // console.error(`server: Invalid room name`);
       return;
     }
 
@@ -45,17 +45,17 @@ io.on("connection", (socket) => {
     if (!room) {
       room = { roomName, users: [socket.id] };
       roomList.push(room);
-      console.info(`\nserver: New room created: ${roomName}`);
+      // console.info(`\nserver: New room created: ${roomName}`);
     }
 
-    console.info(`\ncurrent room list: ${JSON.stringify(roomList)}`);
+    // console.info(`\ncurrent room list: ${JSON.stringify(roomList)}`);
 
     io.to(roomName).emit("roomList", roomList);
   });
 
   // fetch roomList
   socket.on("fetchRoomList", () => {
-    console.log(`server: fetching room list`);
+    // console.log(`server: fetching room list`);
     socket.emit("roomList", roomList);
   });
 
@@ -64,17 +64,17 @@ io.on("connection", (socket) => {
     const { roomName, message, senderId } = data;
     roomMessages.push(data);
 
-    console.log(
-      `\nserver: msg sent from left panel: ${JSON.stringify(roomMessages)}`
-    );
+    // console.log(
+    //   `\nserver: msg sent from left panel: ${JSON.stringify(roomMessages)}`
+    // );
 
     io.emit("newMessage", roomName);
   });
 
   socket.on("showRoomMessage", (roomName) => {
-    console.log(`\nserver: show room message for room: ${roomName}`);
+    // console.log(`\nserver: show room message for room: ${roomName}`);
     const allRoomMsgs = roomMessages.filter((msg) => msg.roomName === roomName);
-    console.log(`\nlist of room messages: ${allRoomMsgs}`);
+    // console.log(`\nlist of room messages: ${allRoomMsgs}`);
     io.to(roomName).emit("message", allRoomMsgs);
   });
 

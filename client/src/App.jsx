@@ -15,13 +15,13 @@ function App() {
   };
 
   const fetchRoomMessage = useCallback((roomName) => {
-    console.log(`fetching room messages from room: ${roomName}`);
+    // console.log(`fetching room messages from room: ${roomName}`);
     socket.emit("showRoomMessage", roomName);
   }, []);
 
   useEffect(() => {
     socket.on("connect", () => {
-      console.log(`connected to socket: ${JSON.stringify(socket.id)}\n`);
+      // console.log(`connected to socket: ${JSON.stringify(socket.id)}\n`);
     });
     fetchRoomList();
     socket.on("roomList", (rooms) => {
@@ -30,7 +30,7 @@ function App() {
     });
 
     socket.on("message", (data) => {
-      console.log(`left panel: got message: ${JSON.stringify(data)}`);
+      // console.log(`left panel: got message: ${JSON.stringify(data)}`);
       setMessages(data);
     });
 
@@ -44,7 +44,7 @@ function App() {
 
   return (
     <div className="w-[80vw] h-[80vh] flex justify-center align-middle">
-      <LeftPanel roomList={roomList} fetchRoomMessage={fetchRoomMessage} />
+      <LeftPanel roomList={roomList} />
 
       <RightPanel
         roomList={roomList}
